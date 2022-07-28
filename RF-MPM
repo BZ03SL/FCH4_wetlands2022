@@ -1,0 +1,409 @@
+from sklearn.ensemble import RandomForestRegressor
+import matplotlib
+import matplotlib.pyplot as plt
+%matplotlib inline
+import numpy as np
+import pandas as pd
+import random
+import seaborn as sns
+import sys
+assert(sys.version_info.major == 3),print(sys.version)
+
+# Data import and data cleaning
+df = pd.read_csv('HK-MPM.csv')
+df = df.replace(-9999,np.nan)
+df = df.dropna()
+str2float = lambda d: list(map(float, d))
+df['yr'] = df['TIMESTAMP_START'] // 100000000
+df['month'] = (df['TIMESTAMP_START'] // 1000000) % 100
+df['day'] = (df['TIMESTAMP_START'] // 10000) % 100
+df['hr'] = (df['TIMESTAMP_START'] // 100) % 100
+df['min'] = df['TIMESTAMP_START'] % 100
+
+# Train/Test split function
+def split_data(df, train_size = .8):
+    length = len(df)
+    indices = list(range(length))
+    np.random.shuffle(indices)
+    
+    train_indices = indices[0 : int(length * train_size)]
+    test_indices = indices[int(length * train_size) : ]
+
+    train = df.iloc[train_indices]
+    test = df.iloc[test_indices]
+
+    return train,test
+dfr = df.copy()
+df_train_v,df_test_v = split_data(dfr)
+
+# Calculate monthly mean FCH4 in training dataset
+month1_m = df_train_v[df_train_v['month'] == 1].FCH4_F.mean()
+month2_m = df_train_v[df_train_v['month'] == 2].FCH4_F.mean()
+month3_m = df_train_v[df_train_v['month'] == 3].FCH4_F.mean()
+month4_m = df_train_v[df_train_v['month'] == 4].FCH4_F.mean()
+month5_m = df_train_v[df_train_v['month'] == 5].FCH4_F.mean()
+month6_m = df_train_v[df_train_v['month'] == 6].FCH4_F.mean()
+month7_m = df_train_v[df_train_v['month'] == 7].FCH4_F.mean()
+month8_m = df_train_v[df_train_v['month'] == 8].FCH4_F.mean()
+month9_m = df_train_v[df_train_v['month'] == 9].FCH4_F.mean()
+month10_m = df_train_v[df_train_v['month'] == 10].FCH4_F.mean()
+month11_m = df_train_v[df_train_v['month'] == 11].FCH4_F.mean()
+month12_m = df_train_v[df_train_v['month'] == 12].FCH4_F.mean()
+
+# Calculate monthly FCH4 variance in training dataset
+var_1 = df_train_v[df_train_v['month'] == 1].FCH4_F.var()
+var_2 = df_train_v[df_train_v['month'] == 2].FCH4_F.var()
+var_3 = df_train_v[df_train_v['month'] == 3].FCH4_F.var()
+var_4 = df_train_v[df_train_v['month'] == 4].FCH4_F.var()
+var_5 = df_train_v[df_train_v['month'] == 5].FCH4_F.var()
+var_6 = df_train_v[df_train_v['month'] == 6].FCH4_F.var()
+var_7 = df_train_v[df_train_v['month'] == 7].FCH4_F.var()
+var_8 = df_train_v[df_train_v['month'] == 8].FCH4_F.var()
+var_9 = df_train_v[df_train_v['month'] == 9].FCH4_F.var()
+var_10 = df_train_v[df_train_v['month'] == 10].FCH4_F.var()
+var_11 = df_train_v[df_train_v['month'] == 11].FCH4_F.var()
+var_12 = df_train_v[df_train_v['month'] == 12].FCH4_F.var()
+
+# Calculate monthly maximum FCH4 value in training dataset
+max_1 = df_train_v[df_train_v['month'] == 1].FCH4_F.max()
+max_2 = df_train_v[df_train_v['month'] == 2].FCH4_F.max()
+max_3 = df_train_v[df_train_v['month'] == 3].FCH4_F.max()
+max_4 = df_train_v[df_train_v['month'] == 4].FCH4_F.max()
+max_5 = df_train_v[df_train_v['month'] == 5].FCH4_F.max()
+max_6 = df_train_v[df_train_v['month'] == 6].FCH4_F.max()
+max_7 = df_train_v[df_train_v['month'] == 7].FCH4_F.max()
+max_8 = df_train_v[df_train_v['month'] == 8].FCH4_F.max()
+max_9 = df_train_v[df_train_v['month'] == 9].FCH4_F.max()
+max_10 = df_train_v[df_train_v['month'] == 10].FCH4_F.max()
+max_11 = df_train_v[df_train_v['month'] == 11].FCH4_F.max()
+max_12 = df_train_v[df_train_v['month'] == 12].FCH4_F.max()
+
+# Calculate monthly minimum FCH4 value in training dataset
+min_1 = df_train_v[df_train_v['month'] == 1].FCH4_F.min()
+min_2 = df_train_v[df_train_v['month'] == 2].FCH4_F.min()
+min_3 = df_train_v[df_train_v['month'] == 3].FCH4_F.min()
+min_4 = df_train_v[df_train_v['month'] == 4].FCH4_F.min()
+min_5 = df_train_v[df_train_v['month'] == 5].FCH4_F.min()
+min_6 = df_train_v[df_train_v['month'] == 6].FCH4_F.min()
+min_7 = df_train_v[df_train_v['month'] == 7].FCH4_F.min()
+min_8 = df_train_v[df_train_v['month'] == 8].FCH4_F.min()
+min_9 = df_train_v[df_train_v['month'] == 9].FCH4_F.min()
+min_10 = df_train_v[df_train_v['month'] == 10].FCH4_F.min()
+min_11 = df_train_v[df_train_v['month'] == 11].FCH4_F.min()
+min_12 = df_train_v[df_train_v['month'] == 12].FCH4_F.min()
+
+# Add monthly mean FCH4 into training dataset
+CH4_mean_train = {'CH4_mean': df_train_v['month'].values.tolist()}
+CH4_mean_train = pd.DataFrame(CH4_mean_train)
+df_train_v.reset_index(drop = True, inplace = True)
+df_train_v = pd.concat([df_train_v,CH4_mean_train],axis = 1)
+
+for i in df_train_v.index:
+    if(df_train_v.loc[i,'CH4_mean'] == 1):
+        df_train_v.loc[i,'CH4_mean'] = month1_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 2):
+        df_train_v.loc[i,'CH4_mean'] = month2_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 3):
+        df_train_v.loc[i,'CH4_mean'] = month3_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 4):
+        df_train_v.loc[i,'CH4_mean'] = month4_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 5):
+        df_train_v.loc[i,'CH4_mean'] = month5_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 6):
+        df_train_v.loc[i,'CH4_mean'] = month6_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 7):
+        df_train_v.loc[i,'CH4_mean'] = month7_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 8):
+        df_train_v.loc[i,'CH4_mean'] = month8_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 9):
+        df_train_v.loc[i,'CH4_mean'] = month9_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 10):
+        df_train_v.loc[i,'CH4_mean'] = month10_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 11):
+        df_train_v.loc[i,'CH4_mean'] = month11_m
+    elif(df_train_v.loc[i,'CH4_mean'] == 12):
+        df_train_v.loc[i,'CH4_mean'] = month12_m
+
+# Add monthly mean FCH4 into testing dataset
+CH4_mean_test = {'CH4_mean': df_test_v['month'].values.tolist()}
+CH4_mean_test = pd.DataFrame(CH4_mean_test)
+df_test_v.reset_index(drop = True, inplace = True)
+df_test_v = pd.concat([df_test_v,CH4_mean_test],axis = 1)
+for i in df_test_v.index:
+    if(df_test_v.loc[i,'CH4_mean'] == 1):
+        df_test_v.loc[i,'CH4_mean'] = month1_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 2):
+        df_test_v.loc[i,'CH4_mean'] = month2_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 3):
+        df_test_v.loc[i,'CH4_mean'] = month3_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 4):
+        df_test_v.loc[i,'CH4_mean'] = month4_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 5):
+        df_test_v.loc[i,'CH4_mean'] = month5_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 6):
+        df_test_v.loc[i,'CH4_mean'] = month6_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 7):
+        df_test_v.loc[i,'CH4_mean'] = month7_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 8):
+        df_test_v.loc[i,'CH4_mean'] = month8_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 9):
+        df_test_v.loc[i,'CH4_mean'] = month9_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 10):
+        df_test_v.loc[i,'CH4_mean'] = month10_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 11):
+        df_test_v.loc[i,'CH4_mean'] = month11_m
+    elif(df_test_v.loc[i,'CH4_mean'] == 12):
+        df_test_v.loc[i,'CH4_mean'] = month12_m
+
+# Add monthly FCH4 variance into training dataset
+CH4_var_train = {'CH4_var': df_train_v['month'].values.tolist()}
+CH4_var_train = pd.DataFrame(CH4_var_train)
+df_train_v = pd.concat([df_train_v,CH4_var_train],axis = 1)
+for i in df_train_v.index:
+    if(df_train_v.loc[i,'CH4_var'] == 1):
+        df_train_v.loc[i,'CH4_var'] = var_1
+    elif(df_train_v.loc[i,'CH4_var'] == 2):
+        df_train_v.loc[i,'CH4_var'] = var_2
+    elif(df_train_v.loc[i,'CH4_var'] == 3):
+        df_train_v.loc[i,'CH4_var'] = var_3
+    elif(df_train_v.loc[i,'CH4_var'] == 4):
+        df_train_v.loc[i,'CH4_var'] = var_4
+    elif(df_train_v.loc[i,'CH4_var'] == 5):
+        df_train_v.loc[i,'CH4_var'] = var_5
+    elif(df_train_v.loc[i,'CH4_var'] == 6):
+        df_train_v.loc[i,'CH4_var'] = var_6
+    elif(df_train_v.loc[i,'CH4_var'] == 7):
+        df_train_v.loc[i,'CH4_var'] = var_7
+    elif(df_train_v.loc[i,'CH4_var'] == 8):
+        df_train_v.loc[i,'CH4_var'] = var_8
+    elif(df_train_v.loc[i,'CH4_var'] == 9):
+        df_train_v.loc[i,'CH4_var'] = var_9
+    elif(df_train_v.loc[i,'CH4_var'] == 10):
+        df_train_v.loc[i,'CH4_var'] = var_10
+    elif(df_train_v.loc[i,'CH4_var'] == 11):
+        df_train_v.loc[i,'CH4_var'] = var_11
+    elif(df_train_v.loc[i,'CH4_var'] == 12):
+        df_train_v.loc[i,'CH4_var'] = var_12
+
+# Add monthly FCH4 variance into testing dataset
+CH4_var_test = {'CH4_var': df_test_v['month'].values.tolist()}
+CH4_var_test = pd.DataFrame(CH4_var_test)
+df_test_v=pd.concat([df_test_v,CH4_var_test],axis = 1)
+for i in df_test_v.index:
+    if(df_test_v.loc[i,'CH4_var'] == 1):
+        df_test_v.loc[i,'CH4_var'] = var_1
+    elif(df_test_v.loc[i,'CH4_var'] == 2):
+        df_test_v.loc[i,'CH4_var'] = var_2
+    elif(df_test_v.loc[i,'CH4_var'] == 3):
+        df_test_v.loc[i,'CH4_var'] = var_3
+    elif(df_test_v.loc[i,'CH4_var'] == 4):
+        df_test_v.loc[i,'CH4_var'] = var_4
+    elif(df_test_v.loc[i,'CH4_var'] == 5):
+        df_test_v.loc[i,'CH4_var'] = var_5
+    elif(df_test_v.loc[i,'CH4_var'] == 6):
+        df_test_v.loc[i,'CH4_var'] = var_6
+    elif(df_test_v.loc[i,'CH4_var'] == 7):
+        df_test_v.loc[i,'CH4_var'] = var_7
+    elif(df_test_v.loc[i,'CH4_var'] == 8):
+        df_test_v.loc[i,'CH4_var'] = var_8
+    elif(df_test_v.loc[i,'CH4_var'] == 9):
+        df_test_v.loc[i,'CH4_var'] = var_9
+    elif(df_test_v.loc[i,'CH4_var'] == 10):
+        df_test_v.loc[i,'CH4_var'] = var_10
+    elif(df_test_v.loc[i,'CH4_var'] == 11):
+        df_test_v.loc[i,'CH4_var'] = var_11
+    elif(df_test_v.loc[i,'CH4_var'] == 12):
+        df_test_v.loc[i,'CH4_var'] = var_12
+
+# Add monthly FCH4 maximum value into training dataset
+CH4_max_train = {'CH4_max': df_train_v['month'].values.tolist()}
+CH4_max_train = pd.DataFrame(CH4_max_train)
+df_train_v = pd.concat([df_train_v,CH4_max_train],axis = 1)
+for i in df_train_v.index:
+    if(df_train_v.loc[i,'CH4_max'] == 1):
+        df_train_v.loc[i,'CH4_max'] = max_1
+    elif(df_train_v.loc[i,'CH4_max'] == 2):
+        df_train_v.loc[i,'CH4_max'] = max_2
+    elif(df_train_v.loc[i,'CH4_max'] == 3):
+        df_train_v.loc[i,'CH4_max'] = max_3
+    elif(df_train_v.loc[i,'CH4_max'] == 4):
+        df_train_v.loc[i,'CH4_max'] = max_4
+    elif(df_train_v.loc[i,'CH4_max'] == 5):
+        df_train_v.loc[i,'CH4_max'] = max_5
+    elif(df_train_v.loc[i,'CH4_max'] == 6):
+        df_train_v.loc[i,'CH4_max'] = max_6
+    elif(df_train_v.loc[i,'CH4_max'] == 7):
+        df_train_v.loc[i,'CH4_max'] = max_7
+    elif(df_train_v.loc[i,'CH4_max'] == 8):
+        df_train_v.loc[i,'CH4_max'] = max_8
+    elif(df_train_v.loc[i,'CH4_max'] == 9):
+        df_train_v.loc[i,'CH4_max'] = max_9
+    elif(df_train_v.loc[i,'CH4_max'] == 10):
+        df_train_v.loc[i,'CH4_max'] = max_10
+    elif(df_train_v.loc[i,'CH4_max'] == 11):
+        df_train_v.loc[i,'CH4_max'] = max_11
+    elif(df_train_v.loc[i,'CH4_max'] == 12):
+        df_train_v.loc[i,'CH4_max'] = max_12
+
+# Add monthly FCH4 maximum value into testing dataset
+CH4_max_test = {'CH4_max': df_test_v['month'].values.tolist()}
+CH4_max_test = pd.DataFrame(CH4_max_test)
+df_test_v = pd.concat([df_test_v,CH4_max_test],axis = 1)
+for i in df_test_v.index:
+    if(df_test_v.loc[i,'CH4_max'] == 1):
+        df_test_v.loc[i,'CH4_max'] = max_1
+    elif(df_test_v.loc[i,'CH4_max'] == 2):
+        df_test_v.loc[i,'CH4_max'] = max_2
+    elif(df_test_v.loc[i,'CH4_max'] == 3):
+        df_test_v.loc[i,'CH4_max'] = max_3
+    elif(df_test_v.loc[i,'CH4_max'] == 4):
+        df_test_v.loc[i,'CH4_max'] = max_4
+    elif(df_test_v.loc[i,'CH4_max'] == 5):
+        df_test_v.loc[i,'CH4_max'] = max_5
+    elif(df_test_v.loc[i,'CH4_max'] == 6):
+        df_test_v.loc[i,'CH4_max'] = max_6
+    elif(df_test_v.loc[i,'CH4_max'] == 7):
+        df_test_v.loc[i,'CH4_max'] = max_7
+    elif(df_test_v.loc[i,'CH4_max'] == 8):
+        df_test_v.loc[i,'CH4_max'] = max_8
+    elif(df_test_v.loc[i,'CH4_max'] == 9):
+        df_test_v.loc[i,'CH4_max'] = max_9
+    elif(df_test_v.loc[i,'CH4_max'] == 10):
+        df_test_v.loc[i,'CH4_max'] = max_10
+    elif(df_test_v.loc[i,'CH4_max'] == 11):
+        df_test_v.loc[i,'CH4_max'] = max_11
+    elif(df_test_v.loc[i,'CH4_max'] == 12):
+        df_test_v.loc[i,'CH4_max'] = max_12
+
+# Add monthly FCH4 minimum value into testing dataset
+CH4_min_test = {'CH4_min': df_test_v['month'].values.tolist()}
+CH4_min_test = pd.DataFrame(CH4_min_test)
+df_test_v = pd.concat([df_test_v,CH4_min_test],axis = 1)
+for i in df_test_v.index:
+    if(df_test_v.loc[i,'CH4_min'] == 1):
+        df_test_v.loc[i,'CH4_min'] = min_1
+    elif(df_test_v.loc[i,'CH4_min'] == 2):
+        df_test_v.loc[i,'CH4_min'] = min_2
+    elif(df_test_v.loc[i,'CH4_min'] == 3):
+        df_test_v.loc[i,'CH4_min'] = min_3
+    elif(df_test_v.loc[i,'CH4_min'] == 4):
+        df_test_v.loc[i,'CH4_min'] = min_4
+    elif(df_test_v.loc[i,'CH4_min'] == 5):
+        df_test_v.loc[i,'CH4_min'] = min_5
+    elif(df_test_v.loc[i,'CH4_min'] == 6):
+        df_test_v.loc[i,'CH4_min'] = min_6
+    elif(df_test_v.loc[i,'CH4_min'] == 7):
+        df_test_v.loc[i,'CH4_min'] = min_7
+    elif(df_test_v.loc[i,'CH4_min'] == 8):
+        df_test_v.loc[i,'CH4_min'] = min_8
+    elif(df_test_v.loc[i,'CH4_min'] == 9):
+        df_test_v.loc[i,'CH4_min'] = min_9
+    elif(df_test_v.loc[i,'CH4_min'] == 10):
+        df_test_v.loc[i,'CH4_min'] = min_10
+    elif(df_test_v.loc[i,'CH4_min'] == 11):
+        df_test_v.loc[i,'CH4_min'] = min_11
+    elif(df_test_v.loc[i,'CH4_min'] == 12):
+        df_test_v.loc[i,'CH4_min'] = min_12
+
+# Add monthly FCH4 minimum value into training dataset
+CH4_min_train = {'CH4_min': df_train_v['month'].values.tolist()}
+CH4_min_train = pd.DataFrame(CH4_min_train)
+df_train_v = pd.concat([df_train_v,CH4_min_train],axis = 1)
+for i in df_train_v.index:
+    if(df_train_v.loc[i,'CH4_min'] == 1):
+        df_train_v.loc[i,'CH4_min'] = min_1
+    elif(df_train_v.loc[i,'CH4_min'] == 2):
+        df_train_v.loc[i,'CH4_min'] = min_2
+    elif(df_train_v.loc[i,'CH4_min'] == 3):
+        df_train_v.loc[i,'CH4_min'] = min_3
+    elif(df_train_v.loc[i,'CH4_min'] == 4):
+        df_train_v.loc[i,'CH4_min'] = min_4
+    elif(df_train_v.loc[i,'CH4_min'] == 5):
+        df_train_v.loc[i,'CH4_min'] = min_5
+    elif(df_train_v.loc[i,'CH4_min'] == 6):
+        df_train_v.loc[i,'CH4_min'] = min_6
+    elif(df_train_v.loc[i,'CH4_min'] == 7):
+        df_train_v.loc[i,'CH4_min'] = min_7
+    elif(df_train_v.loc[i,'CH4_min'] == 8):
+        df_train_v.loc[i,'CH4_min'] = min_8
+    elif(df_train_v.loc[i,'CH4_min'] == 9):
+        df_train_v.loc[i,'CH4_min'] = min_9
+    elif(df_train_v.loc[i,'CH4_min'] == 10):
+        df_train_v.loc[i,'CH4_min'] = min_10
+    elif(df_train_v.loc[i,'CH4_min'] == 11):
+        df_train_v.loc[i,'CH4_min'] = min_11
+    elif(df_train_v.loc[i,'CH4_min'] == 12):
+        df_train_v.loc[i,'CH4_min'] = min_12
+
+del df_train_v['TIMESTAMP_START']
+del df_test_v['TIMESTAMP_START']
+del df_train_v['yr']
+del df_test_v['yr']
+del df_train_v['month']
+del df_test_v['month']
+del df_train_v['day']
+del df_test_v['day']
+del df_train_v['hr']
+del df_test_v['hr']
+del df_train_v['min']
+del df_test_v['min']
+
+y_train_v = df_train_v['FCH4_F']
+y_test_v = df_test_v['FCH4_F']
+
+# Normalization
+df_train2_v = (df_train_v - df_train_v.min(axis = 0)) / (df_train_v.max(axis = 0) - df_train_v.min(axis = 0))
+df_test2_v = (df_test_v - df_train_v.min(axis = 0)) / (df_train_v.max(axis = 0) - df_train_v.min(axis = 0 ))
+
+df_train_v = df_train2_v
+df_test_v = df_test2_v
+
+del df_train_v['FCH4_F']
+del df_test_v['FCH4_F']
+
+train_x = df_train_v
+train_y = y_train_v
+test_x  = df_test_v
+test_y  = y_test_v
+
+# Train RF model
+rf = RandomForestRegressor(n_estimators = 950,max_depth = 88,max_features = 0.35,
+                        min_samples_leaf = 7,max_leaf_nodes = 260,min_samples_split = 17)
+rf = rf.fit(train_x,train_y)
+
+# Make predictions
+train_y_pred = rf.predict(train_x)
+test_y_pred = rf.predict(test_x)
+
+# Control the amount of scatters
+true = test_y.copy()
+pred = test_y_pred.copy()
+true = pd.DataFrame(true)
+pred = pd.DataFrame(pred)
+length_d = int(test_y.shape[0])
+for i in range(0,int(39 * length_d / 40)):
+    rand = random.random()
+    x = rand * (true.shape[0])
+    x = int(x)
+    x = x % true.shape[0]
+    true_i = true.index[x]
+    pred_i = pred.index[x]
+    true = true.drop([true_i])
+    pred = pred.drop([pred_i])
+scatters = pd.concat([true,pred],axis = 1,ignore_index = False)
+scatters = scatters.rename(columns = {'FCH4_F': 'observed',0: 'predicted'})
+full_test_data = pd.concat([test_y,pd.Series(test_y_pred)],axis = 1,ignore_index = False)
+full_test_data = full_test_data.rename(columns = {'FCH4_F': 'observed',0: 'predicted'})
+    
+# Visualize the prediction accuracy with joint kernel density and scatter plot
+plt.figure(figsize = (20,20))
+plt.plot([-90,180],[-90,180],linewidth = '3',color='b')
+g = sns.kdeplot(data = full_test_data,x = "observed",y = "predicted",fill = True,n_levels = 7,color = "darkgreen")
+g.set_xlim(-90,180)
+g.set_ylim(-90,180)
+g.set_xlabel("")
+g.set_ylabel("")
+g.scatter(data = scatters,x = "observed",y = "predicted",marker = "+",color = "b",s = 300,linewidths = 4)
+plt.text(120,-80,"$\mathregular{R^2}$: 0.460\nRMSE: 32.6\nMAE: 20.3",fontsize = 50,family = 'Arial')
+plt.tick_params(labelsize = 50,length = 30,pad = 10,width = 2)
+plt.tight_layout()
