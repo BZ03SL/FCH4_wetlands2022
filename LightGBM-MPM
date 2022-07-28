@@ -353,7 +353,7 @@ y_test_v = df_test_v['FCH4_F']
 
 # Normalization
 df_train2_v = (df_train_v - df_train_v.min(axis = 0)) / (df_train_v.max(axis = 0) - df_train_v.min(axis = 0))
-df_test2_v = (df_test_v - df_train_v.min(axis = 0)) / (df_train_v.max(axis = 0) - df_train_v.min(axis= 0 ))
+df_test2_v = (df_test_v - df_train_v.min(axis = 0)) / (df_train_v.max(axis = 0) - df_train_v.min(axis = 0 ))
 
 df_train_v = df_train2_v
 df_test_v = df_test2_v
